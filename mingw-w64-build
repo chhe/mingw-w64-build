@@ -18,7 +18,7 @@
 
 ROOT_PATH="$HOME/.zeranoe/mingw-w64"
 
-MINGW_W64_BRANCH="master"
+MINGW_W64_VERSION="v10.0.0"
 BINUTILS_BRANCH="binutils-2_40-branch"
 GCC_BRANCH="releases/gcc-12"
 
@@ -41,16 +41,16 @@ Archs:
 
 Options:
   -h, --help                   show help
-  -j <count>, --jobs <count>   override make job count (default: $JOB_COUNT)
-  -p <path>, --prefix <path>   install location (default: $ROOT_PATH/<arch>)
-  -r <path>, --root <path>     location for sources, build artifacts and the resulting compiler (default: $ROOT_PATH)
-  --keep-artifacts             don't remove source and build files after a successful build
-  --disable-threads            disable pthreads and STL <thread>
-  --cached-sources             use existing sources instead of downloading new ones
-  --binutils-branch <branch>   set Binutils branch (default: $BINUTILS_BRANCH)
-  --gcc-branch <branch>        set GCC branch (default: $GCC_BRANCH)
-  --mingw-w64-branch <branch>  set MinGW-w64 branch (default: $MINGW_W64_BRANCH)
-  --linked-runtime <runtime>   set MinGW Linked Runtime (default: $LINKED_RUNTIME)
+  -j <count>, --jobs <count>     override make job count (default: $JOB_COUNT)
+  -p <path>, --prefix <path>     install location (default: $ROOT_PATH/<arch>)
+  -r <path>, --root <path>       location for sources, build artifacts and the resulting compiler (default: $ROOT_PATH)
+  --keep-artifacts               don't remove source and build files after a successful build
+  --disable-threads              disable pthreads and STL <thread>
+  --cached-sources               use existing sources instead of downloading new ones
+  --binutils-branch <branch>     set Binutils branch (default: $BINUTILS_BRANCH)
+  --gcc-branch <branch>          set GCC branch (default: $GCC_BRANCH)
+  --mingw-w64-version <version>  set MinGW-w64 version (default: $MINGW_W64_VERSION)
+  --linked-runtime <runtime>     set MinGW Linked Runtime (default: $LINKED_RUNTIME)
 EOF
 }
 
@@ -126,8 +126,8 @@ download_sources()
     change_dir "$SRC_PATH"
 
     execute "downloading MinGW-w64 source" "" \
-        git clone --depth 1 -b "$MINGW_W64_BRANCH" \
-            https://git.code.sf.net/p/mingw-w64/mingw-w64 mingw-w64
+        wget -O mingw-w64.tar.bz2 https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/mingw-w64-$MINGW_W64_VERSION.tar.bz2/download && \
+            tar xf mingw-w64.tar.bz2 && mv mingw-w64-$MINGW_W64_VERSION mingw-w64 && rm mingw-w64.tar.bz2
 
     execute "downloading Binutils source" "" \
         git clone --depth 1 -b "$BINUTILS_BRANCH" \
@@ -337,19 +337,19 @@ while :; do
         --linked-runtime=)
             arg_error "'--linked-runtime' requires a non-empty option argument"
             ;;
-        --mingw-w64-branch)
+        --mingw-w64-version)
             if [ "$2" ]; then
-                MINGW_W64_BRANCH="$2"
+                MINGW_W64_VERSION="$2"
                 shift
             else
-                arg_error "'--mingw-w64-branch' requires a non-empty option argument"
+                arg_error "'--mingw-w64-version' requires a non-empty option argument"
             fi
             ;;
-        --mingw-w64-branch=?*)
-            MINGW_W64_BRANCH=${1#*=}
+        --mingw-w64-version=?*)
+            MINGW_W64_VERSION=${1#*=}
             ;;
-        --mingw-w64-branch=)
-            arg_error "'--mingw-w64-branch' requires a non-empty option argument"
+        --mingw-w64-version=)
+            arg_error "'--mingw-w64-version' requires a non-empty option argument"
             ;;
         i586)
             BUILD_I586=1
